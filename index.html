@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Molecule Motion &amp; Temperature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#E8ECF2; --panel:#ffffff; --panel2:#F1F4F8; --ink:#14202E; --muted:#56667C; --line:#C9D4E2;
+  --accent:#0E7C91; --accent-weak:#D8EDF1;
+  --liquid:#0E9683; --water:#2563EB; --oxygen:#C0392B; --hydro:#E9EEF3; --dye:#7C3AED;
+  --cold:#2D7DD2; --hot:#D7572B;
+  --good:#117A3B; --good-bg:#DCFCE7;
+  --shadow:0 2px 10px rgba(30,41,59,.10); --radius:12px;
+  --font:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1622; --panel:#17222F; --panel2:#1E2A39; --ink:#E7ECF5; --muted:#93A4BC; --line:#33455C;
+  --accent:#46CFE0; --accent-weak:#143038;
+  --liquid:#27C9A7; --water:#60A5FA; --oxygen:#E35D4F; --hydro:#D7E0EC; --dye:#A78BFA;
+  --cold:#5AA0E8; --hot:#FF8E5E;
+  --good:#4ADE80; --good-bg:#15321E;
+  --shadow:0 2px 12px rgba(0,0,0,.35); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F1622; --panel:#17222F; --panel2:#1E2A39; --ink:#E7ECF5; --muted:#93A4BC; --line:#33455C;
+  --accent:#46CFE0; --accent-weak:#143038;
+  --liquid:#27C9A7; --water:#60A5FA; --oxygen:#E35D4F; --hydro:#D7E0EC; --dye:#A78BFA;
+  --cold:#5AA0E8; --hot:#FF8E5E;
+  --good:#4ADE80; --good-bg:#15321E;
+  --shadow:0 2px 12px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+.topbar{position:sticky;top:0;z-index:60;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.topbar-in{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;gap:1px;margin-right:auto;min-width:0}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.brand .q{font-size:12.5px;color:var(--muted)}
+.themebtn{font:inherit;font-size:16px;background:transparent;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;cursor:pointer;color:var(--ink)}
+
+.wrap{max-width:1160px;margin:0 auto;padding:16px;padding-block:18px}
+.intro{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow);font-size:14px}
+.intro b{color:var(--ink)}
+
+.cols{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+@media (max-width:860px){ .cols{grid-template-columns:1fr} }
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.panel h2{font-size:16px;font-weight:700;margin-bottom:8px}
+
+.tankwrap{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel))}
+.tanktag{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:3px 8px}
+
+.ctl{margin-bottom:16px}
+.ctl:last-child{margin-bottom:0}
+.ctl .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;margin-bottom:6px}
+.ctl .lab .val{font-family:var(--mono);font-size:15px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--cold),#8aa,#c86,var(--hot));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--panel);border:3px solid var(--accent);cursor:pointer;box-shadow:var(--shadow)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--panel);border:3px solid var(--accent);cursor:pointer}
+.ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:3px}
+
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;font-size:13px;border-radius:9px;padding:8px 12px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.cold{border-color:var(--cold);color:var(--cold)} .btn.hot{border-color:var(--hot);color:var(--hot)}
+
+.meter{margin-top:14px}
+.meter .mlab{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:4px}
+.meter .mlab .q{font-family:var(--mono);color:var(--muted)}
+.bar{height:14px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:7px;transition:width .18s linear}
+.bar.speed>span{background:var(--liquid)}
+.bar.ke>span{background:var(--accent)}
+
+.readline{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--muted);margin-top:10px}
+.readline b{color:var(--ink);font-family:var(--mono);font-size:15px}
+
+.notice{margin-top:14px;font-size:13.5px;background:var(--accent-weak);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;color:var(--ink)}
+.notice b{color:var(--accent)}
+
+.look{margin-top:14px}
+.look h3{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.look ol{margin:0;padding-left:20px;font-size:13.5px}
+.look li{margin-bottom:6px}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin-top:10px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.25);flex:none}
+.foot{max-width:1160px;margin:10px auto 0;padding:0 16px 8px;font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand">
+    <div class="eyebrow">Unit 2 · Thermal Energy</div>
+    <h1>Molecule Motion &amp; Temperature</h1>
+    <div class="q">What happens to water molecules when the temperature changes?</div>
+  </div>
+  <button class="themebtn" id="theme" title="Toggle light/dark">◐</button>
+</div></div>
+
+<div class="wrap">
+  <div class="intro">
+    This is a close-up of <b>liquid water</b> — the molecules stay together and slide past each other (they do not spread apart into a gas).
+    Move the <b>temperature</b> slider and watch what happens to how fast the molecules move. Then try adding <b>a drop of dye</b> to see how quickly it spreads.
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>Liquid water — up close</h2>
+      <div class="tankwrap">
+        <canvas id="tank" width="720" height="460"></canvas>
+        <div class="tanktag" id="tanktag">Cool water</div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--oxygen)"></span> Oxygen (O)</span>
+        <span><span class="dot" style="background:var(--hydro)"></span> Hydrogen (H)</span>
+        <span><span class="dot" style="background:var(--dye)"></span> Dye</span>
+        <span>Each bent cluster = one water molecule (H₂O)</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ctl">
+        <div class="lab"><span>Temperature</span><span class="val" id="tval">20&deg;C</span></div>
+        <input type="range" id="temp" min="5" max="95" value="20" step="1">
+        <div class="ends"><span>5&deg;C · cold</span><span>95&deg;C · hot</span></div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn cold" id="bcold">Cold cup (5&deg;C)</button>
+        <button class="btn hot" id="bhot">Hot cup (90&deg;C)</button>
+        <button class="btn" id="bpause">Pause</button>
+      </div>
+      <div class="btnrow" style="margin-top:8px">
+        <button class="btn primary" id="bdye">Add a drop of dye</button>
+        <button class="btn" id="bclear">Clear dye</button>
+      </div>
+
+      <div class="meter">
+        <div class="mlab"><span>Average kinetic energy</span><span class="q" id="keq">low</span></div>
+        <div class="bar ke"><span id="kebar" style="width:20%"></span></div>
+      </div>
+      <div class="readline">Kinetic energy = the energy of <b>motion</b></div>
+    </div>
+  </div>
+</div>
+<div class="foot">Motion is exaggerated so the change is easy to see. The dye spreads faster when the water is hotter because the water molecules are moving faster and bumping the dye around more.</div>
+
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('tank'), ctx=cv.getContext('2d');
+  var cssVar=function(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();};
+  var DPR=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+  // fixed simulation size (a zoomed-in window of liquid) -> consistent packed look
+  var LW=640, LH=430, MARGIN=10;
+  function resize(){ cv.width=Math.round(LW*DPR); cv.height=Math.round(LH*DPR); ctx.setTransform(DPR,0,0,DPR,0,0); }
+
+  // ---- particles (packed so they stay in contact = liquid) ----
+  var mol=[], dye=[];
+  var Ro=12, Rh=6.5, Rd=10.5;                 // oxygen, hydrogen, dye radii
+  var minD=Ro*2.04, minD2=minD*minD;          // contact distance for repulsion
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function initMol(){
+    mol=[];
+    var step=minD*1.25, cols=Math.floor((LW-2*MARGIN)/step), rows=Math.floor((LH-2*MARGIN)/step);
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
+      var x=MARGIN+step*(c+0.5)+(r%2)*step*0.5+rand(-2,2), y=MARGIN+step*(r+0.5)+rand(-2,2);
+      if(x>LW-MARGIN-Ro) continue;
+      var a=rand(0,Math.PI*2);
+      mol.push({x:x,y:y,vx:Math.cos(a),vy:Math.sin(a),ang:rand(0,6.28),f:rand(0.85,1.15)});
+    }
+  }
+  initMol();
+
+  // ---- temperature / speed model (exaggerated for visibility) ----
+  var tempC=20, paused=false;
+  function norm(){return (tempC-5)/90;}                 // 0..1
+  function targetSpeed(){return 0.35+norm()*2.9;}        // logical px/frame, slow->fast
+  function speedPct(){return Math.round(18+Math.sqrt(norm())*78);}  // speed ~ sqrt(KE)
+  function kePct(){return Math.round(12+norm()*84);}      // KE ~ temperature (Kelvin)
+
+  function step(){
+    var ts=targetSpeed(), all=mol.concat(dye), i, p;
+    for(i=0;i<all.length;i++){ p=all[i]; p.idx=i; }
+    // integrate + wall bounce + slow rotation
+    for(i=0;i<all.length;i++){
+      p=all[i]; p.x+=p.vx; p.y+=p.vy;
+      var rr=(p.dyeFlag?Rd:Ro);
+      if(p.x<MARGIN+rr){p.x=MARGIN+rr; p.vx=Math.abs(p.vx);}
+      if(p.x>LW-MARGIN-rr){p.x=LW-MARGIN-rr; p.vx=-Math.abs(p.vx);}
+      if(p.y<MARGIN+rr){p.y=MARGIN+rr; p.vy=Math.abs(p.vy);}
+      if(p.y>LH-MARGIN-rr){p.y=LH-MARGIN-rr; p.vy=-Math.abs(p.vy);}
+      if(p.ang!=null) p.ang+=0.02+ts*0.02;
+    }
+    // soft repulsion via spatial grid (O(n)) -> keeps molecules in contact, jostling
+    var cell=minD, ncol=Math.ceil(LW/cell)+2, grid={};
+    for(i=0;i<all.length;i++){ p=all[i]; var gx=((p.x/cell)|0)+1, gy=((p.y/cell)|0)+1, k=gx*ncol+gy; (grid[k]||(grid[k]=[])).push(p); }
+    for(i=0;i<all.length;i++){
+      p=all[i]; var gx=((p.x/cell)|0)+1, gy=((p.y/cell)|0)+1;
+      for(var ox=-1;ox<=1;ox++)for(var oy=-1;oy<=1;oy++){
+        var cellArr=grid[(gx+ox)*ncol+(gy+oy)]; if(!cellArr) continue;
+        for(var m=0;m<cellArr.length;m++){ var q=cellArr[m]; if(q.idx<=p.idx) continue;
+          var dx=q.x-p.x, dy=q.y-p.y, d2=dx*dx+dy*dy;
+          if(d2<minD2&&d2>0.01){ var d=Math.sqrt(d2), ov=(minD-d)/d*0.5; p.x-=dx*ov; p.y-=dy*ov; q.x+=dx*ov; q.y+=dy*ov; }
+        }
+      }
+    }
+    // thermostat: set each speed to target, steer randomly -> jostling & diffusion
+    for(i=0;i<all.length;i++){
+      var w=all[i], sp=Math.hypot(w.vx,w.vy); if(sp<1e-4){var aa=rand(0,6.28);w.vx=Math.cos(aa);w.vy=Math.sin(aa);}
+      var ang=Math.atan2(w.vy,w.vx)+(Math.random()-0.5)*0.7, des=ts*(w.f||1);
+      w.vx=Math.cos(ang)*des; w.vy=Math.sin(ang)*des;
+    }
+  }
+
+  function drawMolecule(p){
+    var oC=cssVar('--oxygen'), hC=cssVar('--hydro');
+    var a1=p.ang-0.92, a2=p.ang+0.92, L=Ro+Rh-4;
+    ctx.lineWidth=1.6; ctx.strokeStyle='rgba(20,32,46,.5)';
+    [a1,a2].forEach(function(aa){
+      var hx=p.x+Math.cos(aa)*L, hy=p.y+Math.sin(aa)*L;
+      ctx.beginPath(); ctx.arc(hx,hy,Rh,0,6.2832); ctx.fillStyle=hC; ctx.fill(); ctx.stroke();
+    });
+    ctx.beginPath(); ctx.arc(p.x,p.y,Ro,0,6.2832); ctx.fillStyle=oC; ctx.fill(); ctx.stroke();
+  }
+  function drawDye(p){
+    ctx.beginPath(); ctx.arc(p.x,p.y,Rd,0,6.2832); ctx.fillStyle=cssVar('--dye');
+    ctx.fill(); ctx.lineWidth=1.6; ctx.strokeStyle='rgba(20,32,46,.5)'; ctx.stroke();
+  }
+  function draw(){
+    ctx.clearRect(0,0,LW,LH);
+    for(var i=0;i<mol.length;i++) drawMolecule(mol[i]);
+    for(var k=0;k<dye.length;k++) drawDye(dye[k]);
+  }
+
+  function frame(){ if(!paused){step();} draw(); requestAnimationFrame(frame); }
+
+  // ---- UI ----
+  var tval=document.getElementById('tval'),tag=document.getElementById('tanktag');
+  var kebar=document.getElementById('kebar'),keq=document.getElementById('keq');
+  function word(pct,lo,mid,hi){return pct<38?lo:(pct<70?mid:hi);}
+  function syncUI(){
+    tval.innerHTML=tempC+'&deg;C';
+    var ke=kePct();
+    kebar.style.width=ke+'%';
+    keq.textContent=word(ke,'low','medium','high');
+    tag.textContent = tempC<=25?'Cold water' : (tempC>=70?'Hot water':'Warm water');
+  }
+  var temp=document.getElementById('temp');
+  temp.addEventListener('input',function(){tempC=+temp.value; syncUI();});
+  document.getElementById('bcold').onclick=function(){tempC=5;temp.value=5;syncUI();};
+  document.getElementById('bhot').onclick=function(){tempC=90;temp.value=90;syncUI();};
+  var bp=document.getElementById('bpause');
+  bp.onclick=function(){paused=!paused; bp.textContent=paused?'Play':'Pause';};
+  document.getElementById('bdye').onclick=function(){
+    var cx=LW*0.5, cy=LH*0.26;
+    for(var i=0;i<20;i++){var a=rand(0,6.28),rr=rand(0,20);
+      dye.push({dyeFlag:true,x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr,vx:rand(-1,1),vy:rand(-1,1),f:rand(0.85,1.15)});}
+  };
+  document.getElementById('bclear').onclick=function(){dye=[];};
+
+  // theme toggle
+  var tb=document.getElementById('theme');
+  tb.onclick=function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var mql=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = cur ? (cur==='dark'?'light':'dark') : (mql?'light':'dark');
+    document.documentElement.setAttribute('data-theme',next);
+  };
+
+  window.addEventListener('resize',function(){resize();});
+  resize(); syncUI(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
