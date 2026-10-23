@@ -74,6 +74,8 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.cold{border-color:var(--cold);color:var(--cold)} .btn.hot{border-color:var(--hot);color:var(--hot)}
+.btn:disabled{opacity:.4;cursor:not-allowed;background:var(--panel2);border-color:var(--line);color:var(--muted)}
+.btn:disabled:hover{border-color:var(--line)}
 
 .meter{margin-top:14px}
 .meter .mlab{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:4px}
@@ -264,12 +266,15 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   document.getElementById('bhot').onclick=function(){tempC=90;temp.value=90;syncUI();};
   var bp=document.getElementById('bpause');
   bp.onclick=function(){paused=!paused; bp.textContent=paused?'Play':'Pause';};
-  document.getElementById('bdye').onclick=function(){
+  var bdye=document.getElementById('bdye');
+  bdye.onclick=function(){
+    if(bdye.disabled) return;
     var cx=LW*0.5, cy=LH*0.26;
     for(var i=0;i<20;i++){var a=rand(0,6.28),rr=rand(0,20);
       dye.push({dyeFlag:true,x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr,vx:rand(-1,1),vy:rand(-1,1),f:rand(0.85,1.15)});}
+    bdye.disabled=true;
   };
-  document.getElementById('bclear').onclick=function(){dye=[];};
+  document.getElementById('bclear').onclick=function(){dye=[]; bdye.disabled=false;};
 
   // theme toggle
   var tb=document.getElementById('theme');
